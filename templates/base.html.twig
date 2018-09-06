@@ -1,43 +1,46 @@
 <!DOCTYPE html>
 <html>
-    <head>
-    	 <!-- Compiled and minified CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-rc.2/css/materialize.min.css">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-        <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        {% block stylesheets %}{% endblock %}
-    </head>
-    <body>
-    	<script type="text/javascript">
-    	 document.addEventListener('DOMContentLoaded', function() {
-    var elems = document.querySelectorAll('.sidenav');
-    var instances = M.Sidenav.init(elems, options);
-  });</script>
-    	<nav>
-    <div class="nav-wrapper">
-      <a href="#!" class="brand-logo center">Blog</a>
-       <ul class="left hide-on-med-and-down">
-       	<li><a class="waves-effect waves-light btn" href="/posts"><i class="material-icons left">home</i>Index</a></li>
-       </ul>
-      <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
-      <ul class="right hide-on-med-and-down">
-        <li><a class="waves-effect waves-light btn" href="/users/new"><i class="material-icons left">border_color</i>Register</a></li>
-        <li><a class="waves-effect waves-light btn" href="/users/login"><i class="material-icons left">fingerprint</i>Login</a></li>
-        <li><a class="waves-effect waves-light btn" href="/users/Logout"><i class="material-icons left">remove_circle</i>Logout</a></li>
-             </ul>
-    </div>
-  </nav>
+<head>
+	<!-- Compiled and minified CSS -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-rc.2/css/materialize.min.css">
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	<meta charset="UTF-8">
+	<title>{% block title %}Welcome!{% endblock %}</title>
+	{% block stylesheets %}{% endblock %}
+</head>
+<body>
+	<script type="text/javascript">
+	document.addEventListener('DOMContentLoaded', function() {
+		var elems = document.querySelectorAll('.sidenav');
+		var instances = M.Sidenav.init(elems, options);
+	});</script>
+	<nav>
+		<div class="nav-wrapper">
+			<a href="#!" class="brand-logo center">Blog</a>
+			<ul class="left hide-on-med-and-down">
+				<li><a class="waves-effect waves-light btn" href="/posts"><i class="material-icons left">home</i>Index</a></li>
+			</ul>
+			<a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+			<ul class="right hide-on-med-and-down">
+				{% if user is defined %}
+				<li><a class="waves-effect waves-light btn" href="/users/logout"><i class="material-icons left">remove_circle</i>Logout</a></li>
+				{% else %}
+				<li><a class="waves-effect waves-light btn" href="/users/new"><i class="material-icons left">border_color</i>Register</a></li>
+				<li><a class="waves-effect waves-light btn" href="/users/login"><i class="material-icons left">fingerprint</i>Login</a></li>
+				{% endif %}
+			</ul>
+		</div>
+	</nav>
 
-    	{% for message in app.flashes('error') %}
-    <div class="flash-notice">
-        {{ message }}
-    </div>
-{% endfor %}
-        {% block body %}{% endblock %}
-        {% block javascripts %}{% endblock %}
+	{% for message in app.flashes('error') %}
+	<div class="flash-notice">
+		{{ message }}
+	</div>
+	{% endfor %}
+	{% block body %}{% endblock %}
+	{% block javascripts %}{% endblock %}
 
-    <!-- Compiled and minified JavaScript -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-rc.2/js/materialize.min.js"></script>
-    </body>
+	<!-- Compiled and minified JavaScript -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-rc.2/js/materialize.min.js"></script>
+</body>
 </html>

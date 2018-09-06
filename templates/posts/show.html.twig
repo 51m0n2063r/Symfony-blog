@@ -43,7 +43,7 @@
     {{ include('posts/_delete_form.html.twig') }}
 {% endif %}
 {% for comment in comments %}
-<p>{{ comment.content }}</p>
+<a href="/comments/{{comment.id}}"><p>{{ comment.content }}</p></a>
 <h5>{{ comment.author }}</h5>
 {% endfor %}
 {% endblock %}

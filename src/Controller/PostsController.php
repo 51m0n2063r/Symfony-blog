@@ -37,7 +37,13 @@ class PostsController extends AbstractController
                     }
                 }
             }
+            if (isset($_SESSION['user'])) {
+                return $this->render('posts/index.html.twig',['posts'=> $tagged,'user'=>'token']);
+            }
             return $this->render('posts/index.html.twig',['posts'=> $tagged]);
+        }
+        if(isset($_SESSION['user'])){
+            return $this->render('posts/index.html.twig', ['posts' => $postsRepository->findAll(),'user'=>'token']);
         }
         return $this->render('posts/index.html.twig', ['posts' => $postsRepository->findAll()]);
     }
@@ -82,7 +88,7 @@ class PostsController extends AbstractController
      */
     public function show(Posts $post): Response
     {
-        if(isset($_SESSION['user'])&& isset($_SESSION['role'])){
+        if(isset($_SESSION['user']) && isset($_SESSION['role'])){
             if($post->getAuthor() == $_SESSION['user'] || $_SESSION['role'] == 'admin'){
                 return $this->render('posts/show.html.twig', ['post'=> $post, 'comments'=>$post->getComments(), 'token'=>'tokem','user'=>$_SESSION['user']]);
 
@@ -121,6 +127,7 @@ class PostsController extends AbstractController
                 return $this->render('posts/new.html.twig', [
                     'post' => $post,
                     'form' => $form->createView(),
+                    'user' => $_SESSION['user']
                 ]);
             }
         }

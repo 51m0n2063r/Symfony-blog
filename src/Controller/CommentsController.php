@@ -23,7 +23,7 @@ class CommentsController extends AbstractController
      */
     public function index(CommentsRepository $commentsRepository): Response
     {
-        return $this->render('comments/index.html.twig', ['comments' => $commentsRepository->findAll()]);
+        return $this->redirectToRoute('posts_index');
     }
     /**
      * @Route("/{id}/new", name="comments_new", methods="GET|POST")
@@ -54,6 +54,7 @@ class CommentsController extends AbstractController
             return $this->render('comments/new.html.twig', [
                 'comment' => $comment,
                 'form' => $form->createView(),
+                'user' => 'token'
             ]);
         }
         return $this->redirectToRoute('posts_index');
@@ -66,10 +67,12 @@ class CommentsController extends AbstractController
     {
         if(isset($_SESSION['user'])&& isset($_SESSION['role'])){
             if($comment->getAuthor() == $_SESSION['user'] || $_SESSION['role'] == 'admin'){
-            return $this->render('comments/show.html.twig', ['comment' => $comment,'token' => 'A']);
+                return $this->render('comments/show.html.twig', ['comment' => $comment,'token' => 'A','user'=>'token']);
             }
         }
-
+        if(isset($_SESSION['user'])){
+            return $this->render('comments/show.html.twig', ['comment' => $comment,"user"=>'token']);
+        }
         return $this->render('comments/show.html.twig', ['comment' => $comment]);
     }
 
@@ -78,8 +81,8 @@ class CommentsController extends AbstractController
      */
     public function edit(Request $request, Comments $comment): Response
     {
-       return $this->redirectToRoute('posts_index');
-    }
+     return $this->redirectToRoute('posts_index');
+ }
 
     /**
      * @Route("/{id}", name="comments_delete", methods="DELETE")
@@ -88,15 +91,15 @@ class CommentsController extends AbstractController
     {
         if(isset($_SESSION['user'])&& isset($_SESSION['role'])){
             if($comment->getAuthor() == $_SESSION['user'] || $_SESSION['role'] == 'admin'){
-        if ($this->isCsrfTokenValid('delete'.$comment->getId(), $request->request->get('_token'))) {
-            $em = $this->getDoctrine()->getManager();
-            $em->remove($comment);
-            $em->flush();
-        }
+                if ($this->isCsrfTokenValid('delete'.$comment->getId(), $request->request->get('_token'))) {
+                    $em = $this->getDoctrine()->getManager();
+                    $em->remove($comment);
+                    $em->flush();
+                }
 
-        return $this->redirectToRoute('comments_index');
+                return $this->redirectToRoute('comments_index');
+            }
+        }
+        return $this->redirectToRoute('posts_index');
     }
-}
- return $this->redirectToRoute('posts_index');
-}
 }

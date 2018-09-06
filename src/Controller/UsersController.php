@@ -22,6 +22,9 @@ class UsersController extends AbstractController
      */
     public function index(UsersRepository $usersRepository): Response
     {
+      if(isset($_SESSION['user'])){
+        return $this->render('users/index.html.twig', ['users' => $usersRepository->findAll(),'user'=>'token']);
+      }
       return $this->render('users/index.html.twig', ['users' => $usersRepository->findAll()]);
     }
 
@@ -69,8 +72,9 @@ class UsersController extends AbstractController
          if($user[0]->getUsername() == $_POST['login'] && $user[0]->getPassword() == $_POST['password']){
           if(isset($_SESSION['user'])&&$_SESSION['user']!=null){
           session_destroy();
-        }
           session_start();
+        }
+        session_start();
           $_SESSION['user']=$user[0]->getUsername();
           $_SESSION['role']=$user[0]->getRole();
           return $this->redirectToRoute('posts_index'); 
@@ -120,12 +124,4 @@ class UsersController extends AbstractController
      }
      return $this->redirectToRoute('posts_index');
     }
-
-    /**
-     * @Route("/{id}", name="users_delete", methods="DELETE")
-     */
-    public function delete(Request $request, Users $user): Response
-    {
-     return $this->redirectToRoute('posts_index');
-   }
   }
