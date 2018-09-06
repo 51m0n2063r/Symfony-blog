@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Controller;
 
 use App\Entity\Posts;
@@ -32,29 +31,32 @@ class CommentsController extends AbstractController
 
     public function new(Request $request, Posts $post): Response
     {
-        $comment = new Comments();
-        $form = $this->createFormBuilder($comment)
-            ->add('author', TextType::class)
+        if(isset($_SESSION['user'])&& isset($_SESSION['role'])){
+            $comment = new Comments();
+            $form = $this->createFormBuilder($comment)
             ->add('content', TextareaType::class)
             ->add('Submit comment', SubmitType::class)
             ->getForm();
-        $comment->setCreatedAt(new \DateTime('now'));
-        $comment->setPost($post);
-        $form->handleRequest($request);
+            $comment->setAuthor($_SESSION["user"]);
+            $comment->setCreatedAt(new \DateTime('now'));
+            $comment->setPost($post);
+            $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $comment=$form->getData();
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($comment);
-            $em->flush();
+            if ($form->isSubmitted() && $form->isValid()) {
+                $comment=$form->getData();
+                $em = $this->getDoctrine()->getManager();
+                $em->persist($comment);
+                $em->flush();
 
-            return $this->redirectToRoute('posts_index');
+                return $this->redirectToRoute('posts_index');
+            }
+
+            return $this->render('comments/new.html.twig', [
+                'comment' => $comment,
+                'form' => $form->createView(),
+            ]);
         }
-
-        return $this->render('comments/new.html.twig', [
-            'comment' => $comment,
-            'form' => $form->createView(),
-        ]);
+        return $this->redirectToRoute('posts_index');
     }
 
     /**
@@ -62,6 +64,12 @@ class CommentsController extends AbstractController
      */
     public function show(Comments $comment): Response
     {
+        if(isset($_SESSION['user'])&& isset($_SESSION['role'])){
+            if($comment->getAuthor() == $_SESSION['user'] || $_SESSION['role'] == 'admin'){
+            return $this->render('comments/show.html.twig', ['comment' => $comment,'token' => 'A']);
+            }
+        }
+
         return $this->render('comments/show.html.twig', ['comment' => $comment]);
     }
 
@@ -70,19 +78,7 @@ class CommentsController extends AbstractController
      */
     public function edit(Request $request, Comments $comment): Response
     {
-        $form = $this->createForm(CommentsType::class, $comment);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
-
-            return $this->redirectToRoute('comments_edit', ['id' => $comment->getId()]);
-        }
-
-        return $this->render('comments/edit.html.twig', [
-            'comment' => $comment,
-            'form' => $form->createView(),
-        ]);
+       return $this->redirectToRoute('posts_index');
     }
 
     /**
@@ -90,6 +86,8 @@ class CommentsController extends AbstractController
      */
     public function delete(Request $request, Comments $comment): Response
     {
+        if(isset($_SESSION['user'])&& isset($_SESSION['role'])){
+            if($comment->getAuthor() == $_SESSION['user'] || $_SESSION['role'] == 'admin'){
         if ($this->isCsrfTokenValid('delete'.$comment->getId(), $request->request->get('_token'))) {
             $em = $this->getDoctrine()->getManager();
             $em->remove($comment);
@@ -98,4 +96,7 @@ class CommentsController extends AbstractController
 
         return $this->redirectToRoute('comments_index');
     }
+}
+ return $this->redirectToRoute('posts_index');
+}
 }

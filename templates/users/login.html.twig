@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Login{% endblock %}
+
+{% block body %}
+    <h1>Login</h1>
+    {% if usss is defined %}{{dump(usss)}}{% endif %}
+    <form action="login" method="POST">
+    	<input name="login" type="text" placeholder="Username"><br>
+    	<input name="password" type="password" placeholder="Password"><br>
+    	<button type="submit">Login</button>
+    </form>
+{% endblock %}

@@ -47,15 +47,16 @@ class PostsController extends AbstractController
      */
     public function new(Request $request): Response
     {
+         if(isset($_SESSION['user'])&& isset($_SESSION['role'])){
         $post = new Posts();
         $form = $this->createFormBuilder($post)
         ->add('title', TextType::class)
-        ->add('author', TextType::class)
         ->add('content', TextareaType::class)
         ->add('tags', TextareaType::class)
         ->add('create post', SubmitType::class)
         ->getForm();
         $post->setCreatedAt(new \DateTime('now'));
+        $post->setAuthor($_SESSION['user']);
         $form->handleRequest($request);
 
 
@@ -73,12 +74,21 @@ class PostsController extends AbstractController
             'form' => $form->createView(),
         ]);
     }
+        return $this->redirectToRoute('posts_index');
+    }
 
     /**
      * @Route("/{id}", name="posts_show", methods="GET")
      */
     public function show(Posts $post): Response
     {
+        if(isset($_SESSION['user'])&& isset($_SESSION['role'])){
+            if($post->getAuthor() == $_SESSION['user'] || $_SESSION['role'] == 'admin'){
+                return $this->render('posts/show.html.twig', ['post'=> $post, 'comments'=>$post->getComments(), 'token'=>'tokem','user'=>$_SESSION['user']]);
+
+            }
+            return $this->render('posts/show.html.twig', ['post' => $post, 'comments'=>$post->getComments(),'user'=>$_SESSION['user']]);
+        }  
         return $this->render('posts/show.html.twig', ['post' => $post, 'comments'=>$post->getComments()]);
     }
 
@@ -87,29 +97,34 @@ class PostsController extends AbstractController
      */
     public function edit(Request $request, Posts $post): Response
     {
-        $form = $this->createFormBuilder($post)
-        ->add('title', TextType::class)
-        ->add('author', TextType::class)
-        ->add('content', TextareaType::class)
-        ->add('edit post', SubmitType::class)
-        ->getForm();
-        $post->setUpdatedAt(new \DateTime('now'));
-        $form->handleRequest($request);
+        if(isset($_SESSION['user'])&& isset($_SESSION['role'])){
+            if($post->getAuthor() == $_SESSION['user'] || $_SESSION['role'] == 'admin'){
+                $form = $this->createFormBuilder($post)
+                ->add('title', TextType::class)
+                ->add('content', TextareaType::class)
+                ->add('tags',TextareaType::class)
+                ->add('edit post', SubmitType::class)
+                ->getForm();
+                $post->setUpdatedAt(new \DateTime('now'));
+                $form->handleRequest($request);
 
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $post = $form->getData();
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($post);
-            $em->flush();
+                if ($form->isSubmitted() && $form->isValid()) {
+                    $post = $form->getData();
+                    $em = $this->getDoctrine()->getManager();
+                    $em->persist($post);
+                    $em->flush();
 
-            return $this->redirectToRoute('posts_index');
+                    return $this->redirectToRoute('posts_index');
+                }
+
+                return $this->render('posts/new.html.twig', [
+                    'post' => $post,
+                    'form' => $form->createView(),
+                ]);
+            }
         }
-
-        return $this->render('posts/new.html.twig', [
-            'post' => $post,
-            'form' => $form->createView(),
-        ]);
+        return $this->redirectToRoute("posts_index");
     }
 
     /**
@@ -117,6 +132,8 @@ class PostsController extends AbstractController
      */
     public function delete(Request $request, Posts $post): Response
     {
+        if(isset($_SESSION['user'])&& isset($_SESSION['role'])){
+             if($post->getAuthor() == $_SESSION['user'] || $_SESSION['role'] == 'admin'){
         if ($this->isCsrfTokenValid('delete'.$post->getId(), $request->request->get('_token'))) {
             $em = $this->getDoctrine()->getManager();
             $em->remove($post);
@@ -125,4 +142,7 @@ class PostsController extends AbstractController
 
         return $this->redirectToRoute('posts_index');
     }
+}
+    return $this->redirectToRoute('posts_index');
+}
 }
